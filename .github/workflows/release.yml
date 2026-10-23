@@ -29,4 +29,5 @@ jobs:
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "v${{ env.VERSION }}-2.5-build${{ github.run_number }}" build/dist/*.zip --title "ArchiveXL ${{ env.VERSION }} (game 2.5, build ${{ github.run_number }})" --notes "Unofficial build of psiberx/cp2077-archive-xl PR #31 for Cyberpunk 2077 2.5. Extract over the game folder (overlay onto an existing ArchiveXL install; the packed bundle archive is not included)." --target ${{ github.sha }}
+        run: |
+          gh release create "v${{ env.VERSION }}-2.5-build${{ github.run_number }}" build/dist/*.zip --title "ArchiveXL ${{ env.VERSION }} (game 2.5, build ${{ github.run_number }})" --notes "Unofficial build of psiberx/cp2077-archive-xl PR 31 for Cyberpunk 2077 2.5. Extract over the game folder (overlay onto an existing ArchiveXL install; the packed bundle archive is not included)." --target ${{ github.sha }}
