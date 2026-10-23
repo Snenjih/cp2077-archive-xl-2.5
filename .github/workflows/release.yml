@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+      - name: Build
+        run: xmake f -y -m release -a x64 && xmake build -y -v ArchiveXL
+      - name: Package
+        shell: pwsh
+        run: |
+          # The WolvenKit-packed bundle archive is not buildable in CI; the zip is an overlay for an existing install.
+          New-Item -ItemType directory -Force -Path bundle/packed/archive/pc/mod | Out-Null
+          $dll = (Get-ChildItem -Recurse build -Filter ArchiveXL.dll | Select-Object -First 1).FullName
+          ./tools/dist/package-mod.ps1 -ReleaseBin $dll
+          "VERSION=$(./tools/dist/steps/get-version.ps1)" >> $env:GITHUB_ENV
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "v${{ env.VERSION }}-2.5-build${{ github.run_number }}" build/dist/*.zip --title "ArchiveXL ${{ env.VERSION }} (game 2.5, build ${{ github.run_number }})" --notes "Unofficial build of psiberx/cp2077-archive-xl PR #31 for Cyberpunk 2077 2.5. Extract over the game folder (overlay onto an existing ArchiveXL install; the packed bundle archive is not included)." --target ${{ github.sha }}
